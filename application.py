@@ -2,15 +2,15 @@ import pickle
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-
+import os
 from flask import Flask,jsonify,render_template,request
 
-application= Flask(__name__)
-app=application
+app = Flask(__name__)
 
-# ### import ridge regressor and standard scaler
-ridge_model=pickle.load(open('end/models/ridge.pkl','rb'))
-standard_scaler=pickle.load(open('end/models/scaler.pkl','rb'))
+# Load models using absolute paths
+current_dir = os.path.dirname(os.path.abspath(__file__))
+ridge_model = pickle.load(open(os.path.join(current_dir, 'models', 'ridge.pkl'), 'rb'))
+standard_scaler = pickle.load(open(os.path.join(current_dir, 'models', 'scaler.pkl'), 'rb'))
 
 @app.route("/")
 def index():
@@ -29,7 +29,6 @@ def predict_datapoint():
         Classes = float(request.form.get('Classes'))
         Region = float(request.form.get('Region'))
         
-        
         new_data_scaled=standard_scaler.transform([[temperature,RH,Ws,Rain,FFMC,DMC,ISI,Classes,Region]])
         result=ridge_model.predict(new_data_scaled)
         
@@ -37,8 +36,6 @@ def predict_datapoint():
     
     else:
         return render_template('home.html')
-    
-    
 
 if __name__=="__main__":
     app.run(debug=True)
